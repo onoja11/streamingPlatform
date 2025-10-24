@@ -1,4 +1,6 @@
 import React from 'react'
+import { Home, User, Play } from 'lucide-react'
+import Recent from './Recent';
 
 const MainContent = () => {
   const recentItems = [
@@ -20,10 +22,9 @@ const MainContent = () => {
         <h2 className="text-2xl font-bold mb-6">Recents</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {recentItems.map((item) => (
-            <div key={item.id} className="bg-purple-900 p-6 rounded-lg hover:bg-purple-800 transition-colors cursor-pointer">
-              <div className="w-12 h-12 bg-purple-700 rounded-full mb-2"></div>
-              <div className="h-4 bg-purple-700 rounded w-3/4"></div>
-            </div>
+            <Recent key={item.id} title={'Song Name'} artist={'artisat name'}/>
+
+
           ))}
         </div>
       </section>
