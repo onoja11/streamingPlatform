@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/SideBar';
-import MainContent from '../components/mainContent';
+import MainContent from '../components/MainContent';
 
 export const Home = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
