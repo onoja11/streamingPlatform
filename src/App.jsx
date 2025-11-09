@@ -6,6 +6,7 @@ import AppLayout from './layouts/AppLayout.jsx'
 import LoginPage from './pages/auth/LoginPage.jsx'
 import RegisterPage from './pages/auth/RegisterPage.jsx'
 import { Home } from './pages/Home.jsx'
+// import MusicStreamingApp from './pages/MusicStreamingApp.jsx'
 
 function App() {
 

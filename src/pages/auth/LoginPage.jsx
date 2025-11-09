@@ -1,14 +1,15 @@
 import React from 'react'
 import { useState } from 'react'
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({ email: '', password: '' })
-
+    const Navigate = useNavigate()
   const handleSubmit = (e) => {
-    e.preventDefault()
+    // e.preventDefault()
+    Navigate('/home')
     console.log('Login:', formData)
   }
 

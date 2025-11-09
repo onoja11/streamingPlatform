@@ -40,11 +40,11 @@ const Navbar = () => {
   }, []);
 
   const navItems = [
-    { name: 'Home', to: '/', icon: Home },
-    { name: 'Songs', to: '/songs', icon: PlayCircle },
-    { name: 'Albums', to: '/albums', icon: Music },
-    { name: 'About', to: '/about', icon: Info },
-    { name: 'Contact', to: '/contact', icon: Phone },
+    // { name: 'Home', to: '/', icon: Home },
+    // { name: 'Songs', to: '/songs', icon: PlayCircle },
+    // { name: 'Albums', to: '/albums', icon: Music },
+    // { name: 'About', to: '/about', icon: Info },
+    // { name: 'Contact', to: '/contact', icon: Phone },
   ];
 
   return (
