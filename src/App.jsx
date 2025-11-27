@@ -4,8 +4,8 @@ import { PlayerProvider } from './context/PlayerContext';
 import AppLayout from './layouts/AppLayout';
 import Home from './pages/Home';
 import Upload from './pages/Upload';
-import './app.css';
-import Auth from './pages/auth/Auth'; // Import the new Auth page
+import './App.css';
+import Auth from './pages/auth/Auth'; 
 import Library from './pages/Library';
 
 const App = () => {
