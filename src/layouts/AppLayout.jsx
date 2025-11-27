@@ -1,9 +1,10 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/SideBar';
+import MobileTabBar from '../components/MobileTabBar';
 import BottomPlayer from '../components/BottomPlayer';
 import Navbar from '../components/Navbar';
-import SearchModal from '../components/SearchModal'; // Import it
+import SearchModal from '../components/SearchModal';
 import { usePlayer } from '../context/PlayerContext';
 
 const AppLayout = () => {
@@ -12,20 +13,29 @@ const AppLayout = () => {
   return (
     <div className="flex h-screen bg-black text-white font-sans overflow-hidden">
       
-      {/* The Search Modal lives here, independent of the grid */}
       <SearchModal />
 
+      {/* Left Sidebar (Desktop) */}
       <Sidebar />
       
-      <div className="flex-1 flex flex-col relative bg-[#121212] md:m-2 md:rounded-2xl overflow-hidden shadow-2xl shadow-purple-900/10">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col relative bg-[#000000] md:bg-[#121212] md:m-2 md:rounded-2xl overflow-hidden shadow-2xl">
         <Navbar />
-        <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-transparent">
+        
+        {/* SCROLL AREA:
+            Added 'pb-32' to ensure content isn't hidden behind 
+            the Mobile Tab Bar or Bottom Player 
+        */}
+        <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-transparent pb-32 md:pb-24 p-4 md:p-0">
           <Outlet />
         </main>
-        {currentSong && <div className="h-24"></div>}
       </div>
       
+      {/* Bottom Player (Responsive) */}
       <BottomPlayer />
+
+      {/* Mobile Tab Bar (Mobile Only) */}
+      <MobileTabBar />
     </div>
   );
 };
