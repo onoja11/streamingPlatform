@@ -1,33 +1,36 @@
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
-import './App.css'
-import WelcomePage from './pages/WelcomePage.jsx'
-import AuthLayout from './layouts/AuthLayout.jsx'
-import AppLayout from './layouts/AppLayout.jsx'
-import LoginPage from './pages/auth/LoginPage.jsx'
-import RegisterPage from './pages/auth/RegisterPage.jsx'
-import { Home } from './pages/Home.jsx'
-// import MusicStreamingApp from './pages/MusicStreamingApp.jsx'
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { PlayerProvider } from './context/PlayerContext';
+import AppLayout from './layouts/AppLayout';
+import Home from './pages/Home';
+import Upload from './pages/Upload';
+import './app.css';
+import Auth from './pages/auth/Auth'; // Import the new Auth page
+import Library from './pages/Library';
 
-function App() {
-
+const App = () => {
   return (
-    <>
-    <Router>
-      <Routes>
-        <Route element={<AppLayout />} >
-          {/* <Route path="/*" element={<div>Home Page Content</div>} /> */}
-          <Route path="/" element={<WelcomePage />} />
-          <Route path='home' element={<Home/>}/> 
-        </Route>
-        <Route element={<AuthLayout />} >
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-        </Route>
-      </Routes>
-    </Router>
+    <PlayerProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Redirect root to home */}
+          <Route path="/" element={<Navigate to="/home" />} />
+          
+          {/* Auth Routes */}
+          <Route path="/login" element={<Auth />} />
+          <Route path="/register" element={<Auth />} />
+          
+          {/* Protected App Routes */}
+          <Route element={<AppLayout />}>
+             <Route path="/home" element={<Home />} />
+             <Route path="/upload" element={<Upload />} />
+             {/* <Route path="/search" element={<div className="p-10 text-white">Search Page</div>} /> */}
+             <Route path="/library" element={<Library/>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </PlayerProvider>
+  );
+};
 
-    </>
-  )
-}
-
-export default App
+export default App;

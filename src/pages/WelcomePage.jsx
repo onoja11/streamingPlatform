@@ -1,52 +1,41 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import heroImg from '../assets/evymax-removebg-preview.png'
 
 const WelcomePage = () => {
   return (
-    <div className="relative bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto lg:flex lg:items-center lg:justify-between px-6 sm:px-8">
-        
-        {/* Text Section */}
-        <div className="relative z-10 py-16 lg:w-1/2">
-          <main className="mx-auto max-w-xl text-center lg:text-left">
-            <h1 className="fade-in text-4xl text-purple-900 tracking-tight font-extrabold sm:text-5xl md:text-5xl xl:text-6xl">
-              <span className="block pt-9">Let The Music Speak</span>
-              <span className="block">With musicMax</span>
-            </h1>
-            <p className="fade-in mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-              Dive into curated sounds that touch the soul and inspire your next move.
-            </p>
-            <div className="fade-in mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-              <div className="rounded-md shadow">
-                <Link
-                  to="/caps"
-                  className="w-full flex items-center justify-center px-9 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-900 hover:bg-white hover:border hover:border-purple-900 hover:text-purple-900 transition duration-300 md:py-4 md:text-lg md:px-10"
-                >
-                  Stream Now
-                </Link>
-              </div>
-              <div className="mt-3 sm:mt-0 sm:ml-3">
-                <Link
-                  to="/caps"
-                  className="w-full flex items-center justify-center px-9 py-3 border border-purple-900 text-base font-medium rounded-md text-purple-900 hover:bg-purple-900 hover:text-white transition duration-300 md:py-4 md:text-lg md:px-10"
-                >
-                  Featured Tracks
-                </Link>
-              </div>
-            </div>
-          </main>
-        </div>
-
-        {/* Image Section */}
-        <div className="relative lg:w-1/2 flex justify-center lg:justify-end mt-10 lg:mt-0 lg:pr-10">
-          <img
-            src={heroImg}
-            alt="Artist performing"
-            className="w-80  m-3 md:w-[20px] lg:w-[200px] sm:h-[10px] hidden sm:block lg:h-80 xl:w-[550px] object-contain drop-shadow-2xl "
-          />
-        </div>
+    <div className="min-h-screen bg-[#000000] text-white flex flex-col">
+      {/* Nav */}
+      <div className="px-8 py-6 flex justify-between items-center bg-black">
+         <div className="text-2xl font-bold flex items-center gap-1">
+            <span className="w-8 h-8 rounded-full bg-white block"></span>
+            PurpleWave
+         </div>
+         <div className="flex gap-6 font-bold text-base">
+            <Link to="/register" className="text-gray-300 hover:text-white">Sign up</Link>
+            <Link to="/login" className="text-gray-300 hover:text-white">Log in</Link>
+         </div>
       </div>
+
+      {/* Hero */}
+      <div className="flex-1 flex flex-col justify-center items-center text-center px-4 bg-[url('https://images.unsplash.com/photo-1493225255756-d9584f8606e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center relative">
+         <div className="absolute inset-0 bg-[#000000]/60"></div> {/* Overlay */}
+         
+         <div className="relative z-10 max-w-3xl">
+             <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 text-white">
+                 Listening is <br/> everything
+             </h1>
+             <p className="text-green-400 font-bold text-lg mb-8">
+                 Millions of songs and podcasts. No credit card needed.
+             </p>
+             <Link to="/home" className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-lg px-8 py-4 rounded-full transition-transform hover:scale-105">
+                 GET PURPLEWAVE FREE
+             </Link>
+         </div>
+      </div>
+      
+      <footer className="bg-black p-8 text-xs text-gray-500 text-center">
+          &copy; 2024 PurpleWave AB
+      </footer>
     </div>
   )
 }
