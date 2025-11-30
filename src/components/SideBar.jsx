@@ -1,11 +1,12 @@
 import React from 'react';
-import { Home, Search, Library, Upload, Lock } from 'lucide-react';
+import { Home, Search, Library, Upload, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { usePlayer } from '../context/PlayerContext';
 
 const Sidebar = () => {
   const location = useLocation();
-  const { openSearch } = usePlayer();
+  // Destructure 'user' from context to check role
+  const { openSearch, user } = usePlayer();
 
   const NavItem = ({ to, icon: Icon, label, onClick }) => {
     const active = location.pathname === to;
@@ -26,7 +27,6 @@ const Sidebar = () => {
     )
   };
 
-  // ADDED: "hidden md:flex"
   return (
     <aside className="w-64 bg-black hidden md:flex flex-col h-full border-r border-white/5">
       <div className="p-6">
@@ -39,19 +39,17 @@ const Sidebar = () => {
         <NavItem to="/home" icon={Home} label="Home" />
         <NavItem icon={Search} label="Search" onClick={openSearch} />
         <NavItem to="/library" icon={Library} label="My Library" />
-        <div className="pt-6 pb-2 px-4 text-xs font-bold text-gray-500 uppercase tracking-widest">For The Artist</div>
-        <NavItem to="/upload" icon={Upload} label="Upload Music" />
-      </div>
-
-       <div className="p-4 bg-gradient-to-b from-[#121212] to-purple-900/20 m-2 rounded-xl border border-white/5">
-        <div className="flex items-center gap-2 mb-2 text-yellow-500">
-           <Lock size={16} />
-           <span className="text-xs font-bold uppercase tracking-wide">Premium Access</span>
-        </div>
-        <p className="text-xs text-gray-400 mb-3">Unlock all exclusive worship sessions.</p>
-        <button className="w-full bg-white text-black text-xs font-bold py-2 rounded-full hover:scale-105 transition-transform">
-          Upgrade Now
-        </button>
+        
+        {/* --- ADMIN ONLY SECTION --- */}
+        {user.role === 'admin' && (
+            <div className="animate-in fade-in slide-in-from-left-4 duration-500">
+                <div className="pt-6 pb-2 px-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                    For The Artist
+                </div>
+                <NavItem to="/upload" icon={Upload} label="Upload Music" />
+                <NavItem to="/manage" icon={Settings} label="Manage Content" />
+            </div>
+        )}
       </div>
     </aside>
   );
