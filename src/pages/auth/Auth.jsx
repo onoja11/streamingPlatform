@@ -40,9 +40,9 @@ const Auth = () => {
             password: formData.password
         });
 
-        const { token, user } = response.data;
-        console.log("Login Response:", response.data);
-
+        const token = response.data.access_token;
+        const user = response.data.user;
+        console.log(user);
         localStorage.setItem('auth_token', token);
 
         setUser({
