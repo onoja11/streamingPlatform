@@ -5,7 +5,7 @@ import { Music, Disc } from 'lucide-react';
 const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http')) return path;
-    return `http://evy_max_api.test/storage/${path}`; // Use your actual API URL here
+    return path; // Use your actual API URL here
 };
 
 const CoverImage = ({ src, alt, className, icon = 'music' }) => {
