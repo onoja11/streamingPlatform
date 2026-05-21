@@ -10,6 +10,7 @@ import Library from './pages/Library';
 import AlbumDetails from './components/AlbumDetails';
 import AdminRoute from './components/AdminRoute';
 import ManageContent from './pages/ManageContent';
+import Profile from './pages/Profile';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
             <Route path="/upload" element={<AdminRoute><Upload /></AdminRoute>} />
             {/* <Route path="/search" element={<div className="p-10 text-white">Search Page</div>} /> */}
             <Route path="/library" element={<Library />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/album/:id" element={<AlbumDetails />} />
             <Route
               path="/manage"

@@ -14,7 +14,8 @@ const Sidebar = () => {
     if (onClick) {
         return (
             <div onClick={onClick} className="flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5 cursor-pointer">
-                <Icon size={22} />
+                {/* // Add this to your NavItem in Sidebar.jsx */}
+                <Icon size={22} className="group-hover:scale-110 transition-transform duration-200" />
                 <span className="font-semibold">{label}</span>
             </div>
         )
