@@ -6,7 +6,6 @@ import api from '../api/axios';
 const getImageUrl = (path) => {
     if (!path) return 'https://via.placeholder.com/150';
     if (path.startsWith('http')) return path;
-    console.log(getImageUrl(song.music_cover_url));
     return `http://evy_max_api.test/storage/${path}`;
 };
 

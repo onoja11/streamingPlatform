@@ -10,7 +10,7 @@ const getImageUrl = (path) => {
 
 const CoverImage = ({ src, alt, className, icon = 'music' }) => {
   const [hasError, setHasError] = useState(false);
-  const fullSrc = getImageUrl(src);
+  const fullSrc = src;
 
   // If no source or error occurred, show Placeholder
   if (!fullSrc || hasError) {
