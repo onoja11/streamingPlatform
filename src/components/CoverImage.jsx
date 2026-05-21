@@ -22,10 +22,10 @@ const getImageUrl = (path) => {
   const cleanPath = path.replace(/^\/+/, ''); 
   
   if (cleanPath.startsWith('storage/')) {
-    return `${baseUrl}/${cleanPath}`;
+    return `${cleanPath}`;
   }
 
-  return `${baseUrl}/storage/${cleanPath}`; 
+  return `${cleanPath}`; 
 };
 
 const CoverImage = ({ src, alt, className = "", icon = 'music' }) => {
