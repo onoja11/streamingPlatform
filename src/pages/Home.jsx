@@ -14,7 +14,7 @@ const getImageUrl = (path) => {
 
 const AlbumCard = ({ album, navigate }) => {
   const [imgError, setImgError] = useState(false);
-  const src = getImageUrl(album.cover_image);
+  const src = getImageUrl(album.album_cover_url);
 
   return (
     <div 
