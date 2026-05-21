@@ -42,24 +42,32 @@ const Auth = () => {
             password_confirmation: formData.confirmPassword 
           };
 
+      // 1. Hit the login/register endpoint
       const response = await api.post(endpoint, payload);
-      const { access_token: token, user } = response.data;
+      const { access_token: token } = response.data;
 
+      // 2. Save the token immediately so the API client can use it
       localStorage.setItem('auth_token', token);
 
+      // 3. NEW: Fetch the FULL user profile to guarantee we have the exact role
+      // (Change '/user' if your Laravel route for getting the auth user is different, e.g., '/me')
+      const userRes = await api.get('/user'); 
+      const fullUser = userRes.data;
+
+      // 4. Update the Context with the complete data
       setUser({
-        name: user.name,
-        email: user.email,
+        name: fullUser.name,
+        email: fullUser.email,
         isLoggedIn: true,
-        isPremium: user.is_premium === 1,
-        role: user.role || 'user' // Ensure role is captured for Admin routes
+        isPremium: fullUser.is_premium === 1,
+        role: fullUser.role || fullUser.is_admin ? 'admin' : 'user' // Handles both common Laravel admin checks
       });
 
+      // 5. Now navigate. The sidebar will have the admin role instantly!
       navigate('/home');
 
     } catch (err) {
       console.error("Auth Error:", err);
-      // Handle Laravel's specific validation error format
       if (err.response?.data?.errors) {
         const firstError = Object.values(err.response.data.errors)[0][0];
         setError(firstError);
