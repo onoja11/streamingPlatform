@@ -54,33 +54,44 @@ const Upload = () => {
     }
   };
 
-  const handleSongSubmit = async (e) => {
+ const handleSongSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setMessage(null);
-
+    
+    // 1. Final Safety Check
     if (!songData.audio) {
       setMessage({ type: 'error', text: 'Please select an audio file.' });
-      setIsLoading(false);
       return;
     }
+
+    setIsLoading(true);
+    setMessage(null);
 
     const formData = new FormData();
     formData.append('title', songData.title);
     formData.append('artist', songData.artist);
     if (songData.album_id) formData.append('album_id', songData.album_id);
+    
+    // 2. Append the file explicitly
     formData.append('audio_file', songData.audio);
-    if (songData.cover) formData.append('cover_image', songData.cover);
+    
+    if (songData.cover) {
+      formData.append('cover_image', songData.cover);
+    }
 
     try {
-      // REMOVED manual header for multipart to fix the boundary issue
-      await api.post('/songs', formData);
+      // 3. For live production, ensure we use the 'api' instance 
+      // but explicitly pass the multipart header so Laravel's parser knows how to read the stream
+      await api.post('/songs', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       
       setMessage({ type: 'success', text: 'Song uploaded successfully!' });
       setSongData({ title: '', artist: '', album_id: '', audio: null, cover: null });
       setFileInputKey(Date.now()); 
     } catch (err) {
-      // Display specific validation errors from Laravel
+      console.error(err.response?.data); // Check this in Browser F12 Console
       const errorData = err.response?.data?.errors;
       const errMsg = errorData ? Object.values(errorData)[0][0] : (err.response?.data?.message || 'Failed to upload song.');
       setMessage({ type: 'error', text: errMsg });
