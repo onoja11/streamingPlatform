@@ -39,13 +39,16 @@ const Upload = () => {
     if (albumData.cover) formData.append('cover_image', albumData.cover);
 
     try {
-      await api.post('/albums', formData, { headers: { 'Content-Type': 'multipart/form-data' }});
+      // Axios automatically sets 'Content-Type': 'multipart/form-data' with boundaries when sending FormData
+      await api.post('/albums', formData);
+      
       setMessage({ type: 'success', text: 'Album created successfully!' });
       setAlbumData({ title: '', artist: '', year: '', cover: null });
-      setFileInputKey(Date.now()); // Reset file inputs visually
+      setFileInputKey(Date.now()); 
       fetchAlbums(); 
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to create album.' });
+      const errMsg = err.response?.data?.message || 'Failed to create album.';
+      setMessage({ type: 'error', text: errMsg });
     } finally {
       setIsLoading(false);
     }
@@ -56,20 +59,31 @@ const Upload = () => {
     setIsLoading(true);
     setMessage(null);
 
+    if (!songData.audio) {
+      setMessage({ type: 'error', text: 'Please select an audio file.' });
+      setIsLoading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('title', songData.title);
     formData.append('artist', songData.artist);
     if (songData.album_id) formData.append('album_id', songData.album_id);
-    if (songData.audio) formData.append('audio_file', songData.audio);
+    formData.append('audio_file', songData.audio);
     if (songData.cover) formData.append('cover_image', songData.cover);
 
     try {
-      await api.post('/songs', formData, { headers: { 'Content-Type': 'multipart/form-data' }});
+      // REMOVED manual header for multipart to fix the boundary issue
+      await api.post('/songs', formData);
+      
       setMessage({ type: 'success', text: 'Song uploaded successfully!' });
       setSongData({ title: '', artist: '', album_id: '', audio: null, cover: null });
-      setFileInputKey(Date.now()); // Reset file inputs visually
+      setFileInputKey(Date.now()); 
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to upload song.' });
+      // Display specific validation errors from Laravel
+      const errorData = err.response?.data?.errors;
+      const errMsg = errorData ? Object.values(errorData)[0][0] : (err.response?.data?.message || 'Failed to upload song.');
+      setMessage({ type: 'error', text: errMsg });
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +114,7 @@ const Upload = () => {
       {message && (
         <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
             {message.type === 'success' ? <Check size={20} /> : <AlertCircle size={20} />}
-            <span className="font-medium">{message.text}</span>
+            <span className="font-medium text-sm">{message.text}</span>
         </div>
       )}
 
@@ -151,7 +165,7 @@ const Upload = () => {
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-400 uppercase">Audio File</label>
                             <div className="border-2 border-dashed border-gray-700 rounded-xl flex flex-col items-center justify-center h-32 bg-black/20 hover:border-purple-500 transition-all cursor-pointer relative group">
-                                <input key={`audio-${fileInputKey}`} required type="file" accept="audio/*" onChange={(e) => setSongData({...songData, audio: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                                <input key={`audio-${fileInputKey}`} type="file" accept="audio/*" onChange={(e) => setSongData({...songData, audio: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
                                 <Music className="text-gray-500 group-hover:text-purple-400 mb-2 transition-colors" size={28} />
                                 <span className="text-gray-400 text-xs text-center px-4 truncate w-full">
                                     {songData.audio ? songData.audio.name : 'Click to upload MP3'}
