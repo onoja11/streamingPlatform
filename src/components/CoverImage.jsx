@@ -4,28 +4,21 @@ import { Music, Disc } from 'lucide-react';
 const getImageUrl = (path) => {
   if (!path) return null;
 
-  // 1. If it's a Cloudinary URL, let's inject optimizations!
-  if (path.includes('res.cloudinary.com')) {
-    // Inject f_auto (auto-format like WebP) and q_auto (auto-quality compression)
-    // This turns .../upload/v123/... into .../upload/f_auto,q_auto/v123/...
-    // It reduces image size by ~70% without losing visible quality.
-    return path.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_500/');
-  }
-
-  // 2. If it's any other absolute HTTP link, just return it
+  // 1. If it's already an absolute URL (Cloudinary or otherwise), use it as-is
   if (path.startsWith('http')) {
+    // If it's Cloudinary, we can still apply optimizations safely
+    if (path.includes('res.cloudinary.com')) {
+      return path.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_500/');
+    }
     return path;
   }
 
-  // 3. Fallback for local development (if Cloudinary isn't used locally)
+  // 2. If it's a relative path (starts with / or just a filename), 
+  // prepend your API base.
   const baseUrl = 'http://evy_max_api.test'; 
-  const cleanPath = path.replace(/^\/+/, ''); 
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
   
-  if (cleanPath.startsWith('storage/')) {
-    return `${cleanPath}`;
-  }
-
-  return `${cleanPath}`; 
+  return `${baseUrl}/storage${cleanPath}`;
 };
 
 const CoverImage = ({ src, alt, className = "", icon = 'music' }) => {
