@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Upload as UploadIcon, Disc, Music, Check, AlertCircle } from 'lucide-react';
+import { Upload as UploadIcon, Disc, Music, Check, AlertCircle, Loader2 } from 'lucide-react';
 import api from '../api/axios';
-import { usePlayer } from '../context/PlayerContext';
 
 const Upload = () => {
   const [activeTab, setActiveTab] = useState('album'); 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [albums, setAlbums] = useState([]);
+  
+  // Force file inputs to reset visually by changing their React key
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
 
-  // --- STATES ---
-  const [albumData, setAlbumData] = useState({ 
-    title: '', artist: '', year: '', cover: null 
-  });
-
-  const [songData, setSongData] = useState({ 
-    title: '', 
-    artist: '', // Added Artist to Song
-    album_id: '', // Optional now
-    audio: null,
-    cover: null // Added Cover to Song
-  });
+  const [albumData, setAlbumData] = useState({ title: '', artist: '', year: '', cover: null });
+  const [songData, setSongData] = useState({ title: '', artist: '', album_id: '', audio: null, cover: null });
 
   useEffect(() => {
     fetchAlbums();
@@ -35,7 +27,6 @@ const Upload = () => {
     }
   };
 
-  // ... (handleAlbumSubmit stays the same) ...
   const handleAlbumSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -48,15 +39,13 @@ const Upload = () => {
     if (albumData.cover) formData.append('cover_image', albumData.cover);
 
     try {
-      await api.post('/albums', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post('/albums', formData, { headers: { 'Content-Type': 'multipart/form-data' }});
       setMessage({ type: 'success', text: 'Album created successfully!' });
       setAlbumData({ title: '', artist: '', year: '', cover: null });
+      setFileInputKey(Date.now()); // Reset file inputs visually
       fetchAlbums(); 
     } catch (err) {
-      console.error(err);
-      setMessage({ type: 'error', text: 'Failed to create album.' });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to create album.' });
     } finally {
       setIsLoading(false);
     }
@@ -70,24 +59,17 @@ const Upload = () => {
     const formData = new FormData();
     formData.append('title', songData.title);
     formData.append('artist', songData.artist);
-    
-    // Only append album_id if user actually selected one
-    if (songData.album_id) {
-        formData.append('album_id', songData.album_id);
-    }
-
+    if (songData.album_id) formData.append('album_id', songData.album_id);
     if (songData.audio) formData.append('audio_file', songData.audio);
     if (songData.cover) formData.append('cover_image', songData.cover);
 
     try {
-      await api.post('/songs', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post('/songs', formData, { headers: { 'Content-Type': 'multipart/form-data' }});
       setMessage({ type: 'success', text: 'Song uploaded successfully!' });
       setSongData({ title: '', artist: '', album_id: '', audio: null, cover: null });
+      setFileInputKey(Date.now()); // Reset file inputs visually
     } catch (err) {
-      console.error(err);
-      setMessage({ type: 'error', text: 'Failed to upload song.' });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to upload song.' });
     } finally {
       setIsLoading(false);
     }
@@ -96,109 +78,115 @@ const Upload = () => {
   return (
     <div className="md:p-8 max-w-4xl mx-auto min-h-screen">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
-        <p className="text-gray-400 text-sm">Manage your library content.</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-white">Upload Content</h1>
+        <p className="text-gray-400 text-sm">Add new albums and tracks to your platform.</p>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-4 mb-6">
         <button 
             onClick={() => { setActiveTab('album'); setMessage(null); }}
-            className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'album' ? 'bg-purple-600 text-white' : 'bg-[#181818] text-gray-400 hover:text-white'}`}
+            className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'album' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'bg-[#181818] text-gray-400 hover:text-white'}`}
         >
             <Disc size={20} /> Create Album
         </button>
         <button 
             onClick={() => { setActiveTab('song'); setMessage(null); }}
-            className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'song' ? 'bg-purple-600 text-white' : 'bg-[#181818] text-gray-400 hover:text-white'}`}
+            className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${activeTab === 'song' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'bg-[#181818] text-gray-400 hover:text-white'}`}
         >
             <Music size={20} /> Upload Song
         </button>
       </div>
 
-      {/* Feedback Message */}
       {message && (
-        <div className={`mb-6 p-4 rounded-xl flex items-center gap-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+        <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
             {message.type === 'success' ? <Check size={20} /> : <AlertCircle size={20} />}
-            {message.text}
+            <span className="font-medium">{message.text}</span>
         </div>
       )}
 
-      <div className="bg-[#181818] border border-white/5 rounded-2xl p-4 md:p-8 shadow-2xl animate-in fade-in">
-        
-        {/* --- ALBUM FORM (Unchanged) --- */}
+      <div className="bg-[#181818] border border-white/5 rounded-2xl p-6 md:p-8 shadow-2xl">
         {activeTab === 'album' && (
-            <form onSubmit={handleAlbumSubmit} className="space-y-6">
+            <form onSubmit={handleAlbumSubmit} className="space-y-6 animate-in fade-in duration-300">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-400 uppercase">Album Cover</label>
-                        <div className="border-2 border-dashed border-gray-700 rounded-xl flex flex-col items-center justify-center h-64 bg-black/20 hover:border-purple-500 transition-all cursor-pointer relative overflow-hidden">
-                            <input type="file" accept="image/*" onChange={(e) => setAlbumData({...albumData, cover: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer" />
-                            {albumData.cover ? <img src={URL.createObjectURL(albumData.cover)} alt="Preview" className="w-full h-full object-cover" /> : <UploadIcon className="text-purple-400" />}
+                        <div className="border-2 border-dashed border-gray-700 rounded-xl flex flex-col items-center justify-center h-64 bg-black/20 hover:border-purple-500 transition-all cursor-pointer relative overflow-hidden group">
+                            <input key={fileInputKey} type="file" accept="image/*" onChange={(e) => setAlbumData({...albumData, cover: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                            {albumData.cover ? (
+                                <img src={URL.createObjectURL(albumData.cover)} alt="Preview" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="flex flex-col items-center text-gray-500 group-hover:text-purple-400 transition-colors">
+                                    <UploadIcon size={32} className="mb-2" />
+                                    <span className="text-sm">Click to browse</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Album Title</label>
-                            <input required type="text" value={albumData.title || ''} onChange={e => setAlbumData({...albumData, title: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none" />
+                            <input required type="text" value={albumData.title} onChange={e => setAlbumData({...albumData, title: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none transition-colors" />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Artist</label>
-                            <input required type="text" value={albumData.artist || ''} onChange={e => setAlbumData({...albumData, artist: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none" />
+                            <input required type="text" value={albumData.artist} onChange={e => setAlbumData({...albumData, artist: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none transition-colors" />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Release Year</label>
-                            <input required type="number" value={albumData.year || ''} onChange={e => setAlbumData({...albumData, year: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none" />
+                            <input required type="number" value={albumData.year} onChange={e => setAlbumData({...albumData, year: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none transition-colors" />
                         </div>
                     </div>
                 </div>
-                <button disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg disabled:opacity-50">{isLoading ? 'Creating...' : 'Create Album'}</button>
+                <button disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+                    {isLoading && <Loader2 size={18} className="animate-spin" />}
+                    {isLoading ? 'Creating...' : 'Create Album'}
+                </button>
             </form>
         )}
 
-        {/* --- SONG FORM (Updated) --- */}
         {activeTab === 'song' && (
-            <form onSubmit={handleSongSubmit} className="space-y-6">
+            <form onSubmit={handleSongSubmit} className="space-y-6 animate-in fade-in duration-300">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    
-                    {/* Left Col: Uploads */}
                     <div className="space-y-4">
-                        {/* Audio */}
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-400 uppercase">Audio File</label>
-                            <div className="border-2 border-dashed border-gray-700 rounded-xl flex flex-col items-center justify-center h-32 bg-black/20 hover:border-purple-500 transition-all cursor-pointer relative">
-                                <input required type="file" accept="audio/*" onChange={(e) => setSongData({...songData, audio: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer" />
-                                <Music className="text-purple-400 mb-2" />
-                                <span className="text-gray-400 text-xs text-center px-2">{songData.audio ? songData.audio.name : 'Click to upload MP3'}</span>
+                            <div className="border-2 border-dashed border-gray-700 rounded-xl flex flex-col items-center justify-center h-32 bg-black/20 hover:border-purple-500 transition-all cursor-pointer relative group">
+                                <input key={`audio-${fileInputKey}`} required type="file" accept="audio/*" onChange={(e) => setSongData({...songData, audio: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                                <Music className="text-gray-500 group-hover:text-purple-400 mb-2 transition-colors" size={28} />
+                                <span className="text-gray-400 text-xs text-center px-4 truncate w-full">
+                                    {songData.audio ? songData.audio.name : 'Click to upload MP3'}
+                                </span>
                             </div>
                         </div>
 
-                        {/* Song Cover (New) */}
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-400 uppercase">Song Cover (Optional)</label>
                             <div className="border-2 border-dashed border-gray-700 rounded-xl flex flex-col items-center justify-center h-32 bg-black/20 hover:border-purple-500 transition-all cursor-pointer relative overflow-hidden">
-                                <input type="file" accept="image/*" onChange={(e) => setSongData({...songData, cover: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer" />
-                                {songData.cover ? <img src={URL.createObjectURL(songData.cover)} alt="Preview" className="w-full h-full object-cover" /> : <span className="text-gray-400 text-xs">Upload Cover</span>}
+                                <input key={`cover-${fileInputKey}`} type="file" accept="image/*" onChange={(e) => setSongData({...songData, cover: e.target.files[0]})} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                                {songData.cover ? (
+                                    <img src={URL.createObjectURL(songData.cover)} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-gray-500 text-sm">Upload Image</span>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Col: Details */}
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Song Title</label>
-                            <input required type="text" value={songData.title || ''} onChange={e => setSongData({...songData, title: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none" />
+                            <input required type="text" value={songData.title} onChange={e => setSongData({...songData, title: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none transition-colors" />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Artist</label>
-                            <input required type="text" value={songData.artist || ''} onChange={e => setSongData({...songData, artist: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none" />
+                            <input required type="text" value={songData.artist} onChange={e => setSongData({...songData, artist: e.target.value})} className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none transition-colors" />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Album (Optional)</label>
                             <select 
-                                value={songData.album_id || ''} 
+                                value={songData.album_id} 
                                 onChange={e => setSongData({...songData, album_id: e.target.value})} 
-                                className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none"
+                                className="w-full bg-[#0a0a0a] border border-gray-700 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none transition-colors appearance-none"
                             >
                                 <option value="">Single (No Album)</option>
                                 {albums.map(album => (
@@ -208,7 +196,10 @@ const Upload = () => {
                         </div>
                     </div>
                 </div>
-                <button disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg disabled:opacity-50">{isLoading ? 'Uploading...' : 'Upload Song'}</button>
+                <button disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+                    {isLoading && <Loader2 size={18} className="animate-spin" />}
+                    {isLoading ? 'Uploading...' : 'Upload Song'}
+                </button>
             </form>
         )}
       </div>
