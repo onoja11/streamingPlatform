@@ -49,7 +49,7 @@ const AlbumDetails = () => {
         {/* Album Art */}
         <div className="w-48 h-48 md:w-64 md:h-64 shadow-2xl rounded-xl overflow-hidden flex-shrink-0 mx-auto md:mx-0">
             <img 
-                src={getImageUrl(album.cover_image)} 
+                src={getImageUrl(album.album_cover_url)} 
                 alt={album.title} 
                 className="w-full h-full object-cover"
             />
