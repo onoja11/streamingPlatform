@@ -6,7 +6,7 @@ const ManageContent = () => {
   const [activeTab, setActiveTab] = useState('albums');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState(null); // Replaces alert()
+  const [notification, setNotification] = useState(null); 
   
   const [editingItem, setEditingItem] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -25,9 +25,17 @@ const ManageContent = () => {
     setLoading(true);
     try {
       const res = await api.get(`/${activeTab}`);
-      setItems(res.data);
+      
+      // Safely parse whether response is a wrapped resource object or raw array
+      const responseData = res.data;
+      if (Array.isArray(responseData)) {
+        setItems(responseData);
+      } else {
+        setItems(responseData.data || []);
+      }
     } catch (err) {
       showNotification('error', 'Failed to fetch items');
+      setItems([]);
     } finally {
       setLoading(false);
     }

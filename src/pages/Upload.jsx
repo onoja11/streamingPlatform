@@ -8,7 +8,6 @@ const Upload = () => {
   const [message, setMessage] = useState(null);
   const [albums, setAlbums] = useState([]);
   
-  // Force file inputs to reset visually by changing their React key
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const [albumData, setAlbumData] = useState({ title: '', artist: '', year: '', cover: null });
@@ -21,7 +20,7 @@ const Upload = () => {
   const fetchAlbums = async () => {
     try {
       const res = await api.get('/albums');
-      setAlbums(res.data);
+      setAlbums(res.data.data || res.data);
     } catch (err) {
       console.error("Failed to fetch albums", err);
     }
@@ -36,10 +35,12 @@ const Upload = () => {
     formData.append('title', albumData.title);
     formData.append('artist', albumData.artist);
     formData.append('year', albumData.year);
-    if (albumData.cover) formData.append('cover_image', albumData.cover);
+    if (albumData.cover) {
+      formData.append('cover_image', albumData.cover);
+    }
 
     try {
-      // Axios automatically sets 'Content-Type': 'multipart/form-data' with boundaries when sending FormData
+      // DO NOT manually set Content-Type header; let Axios handle the boundary automatically
       await api.post('/albums', formData);
       
       setMessage({ type: 'success', text: 'Album created successfully!' });
@@ -47,17 +48,17 @@ const Upload = () => {
       setFileInputKey(Date.now()); 
       fetchAlbums(); 
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Failed to create album.';
+      const errorData = err.response?.data?.errors;
+      const errMsg = errorData ? Object.values(errorData)[0][0] : (err.response?.data?.message || 'Failed to create album.');
       setMessage({ type: 'error', text: errMsg });
     } finally {
       setIsLoading(false);
     }
   };
 
- const handleSongSubmit = async (e) => {
+  const handleSongSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. Final Safety Check
     if (!songData.audio) {
       setMessage({ type: 'error', text: 'Please select an audio file.' });
       return;
@@ -69,9 +70,10 @@ const Upload = () => {
     const formData = new FormData();
     formData.append('title', songData.title);
     formData.append('artist', songData.artist);
-    if (songData.album_id) formData.append('album_id', songData.album_id);
+    if (songData.album_id) {
+      formData.append('album_id', songData.album_id);
+    }
     
-    // 2. Append the file explicitly
     formData.append('audio_file', songData.audio);
     
     if (songData.cover) {
@@ -79,19 +81,13 @@ const Upload = () => {
     }
 
     try {
-      // 3. For live production, ensure we use the 'api' instance 
-      // but explicitly pass the multipart header so Laravel's parser knows how to read the stream
-      await api.post('/songs', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Removed manual headers to allow Axios multipart boundary generation
+      await api.post('/songs', formData);
       
       setMessage({ type: 'success', text: 'Song uploaded successfully!' });
       setSongData({ title: '', artist: '', album_id: '', audio: null, cover: null });
       setFileInputKey(Date.now()); 
     } catch (err) {
-      console.error(err.response?.data); // Check this in Browser F12 Console
       const errorData = err.response?.data?.errors;
       const errMsg = errorData ? Object.values(errorData)[0][0] : (err.response?.data?.message || 'Failed to upload song.');
       setMessage({ type: 'error', text: errMsg });

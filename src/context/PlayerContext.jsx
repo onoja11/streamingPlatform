@@ -10,7 +10,8 @@ export const PlayerProvider = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   
-  // 1. ADD Loading State
+  const [queue, setQueue] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const [user, setUser] = useState({
@@ -24,15 +25,12 @@ export const PlayerProvider = ({ children }) => {
   useEffect(() => {
     const restoreSession = async () => {
         const token = localStorage.getItem('auth_token');
-        
         if (token) {
             try {
                 const response = await api.get('/user');
-                
                 setUser({
                     ...response.data,
                     isLoggedIn: true,
-                    // 2. Map is_admin to role
                     role: response.data.is_admin === true ? 'admin' : 'guest' 
                 });
             } catch (error) {
@@ -40,16 +38,44 @@ export const PlayerProvider = ({ children }) => {
                 localStorage.removeItem('auth_token');
             }
         }
-        // 3. Stop loading when done
         setIsLoading(false);
     };
-
     restoreSession();
   }, []);
 
-  const playSong = (song) => {
+  const playSong = (song, songList = []) => {
     setCurrentSong(song);
     setIsPlaying(true);
+
+    if (songList && songList.length > 0) {
+      setQueue(songList);
+      const index = songList.findIndex(s => s.id === song.id);
+      if (index !== -1) {
+        setCurrentIndex(index);
+      }
+    } else {
+      setQueue(prev => (prev.length > 0 ? prev : [song]));
+      setCurrentIndex(0);
+    }
+  };
+
+  const playNext = () => {
+    if (queue.length > 0) {
+      const nextIndex = (currentIndex + 1) % queue.length;
+      setCurrentIndex(nextIndex);
+      setCurrentSong(queue[nextIndex]);
+      setIsPlaying(true);
+    }
+  };
+
+  const playPrevious = () => {
+    if (queue.length > 0) {
+      // Fix: Safely loop back to the end of the queue or stop at 0 if preferred
+      const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
+      setCurrentIndex(prevIndex);
+      setCurrentSong(queue[prevIndex]);
+      setIsPlaying(true);
+    }
   };
 
   const togglePlay = () => setIsPlaying(!isPlaying);
@@ -58,10 +84,18 @@ export const PlayerProvider = ({ children }) => {
 
   return (
     <PlayerContext.Provider value={{ 
-        currentSong, isPlaying, playSong, togglePlay, 
-        user, setUser,
-        isSearchOpen, openSearch, closeSearch,
-        isLoading // 4. Export loading state
+        currentSong, 
+        isPlaying, 
+        playSong, 
+        playNext, 
+        playPrevious, 
+        togglePlay, 
+        user, 
+        setUser,
+        isSearchOpen, 
+        openSearch, 
+        closeSearch,
+        isLoading 
     }}>
       {children}
     </PlayerContext.Provider>

@@ -9,7 +9,7 @@ import { Disc, Music } from 'lucide-react';
 const getImageUrl = (path) => {
   if (!path) return null;
   if (path.startsWith('http')) return path;
-  return `http://evy_max_api.test/storage/${path}`;
+  return `http://streamingplatform_api.test/storage/${path}`;
 };
 
 const AlbumCard = ({ album, navigate }) => {
@@ -52,10 +52,15 @@ const Home = () => {
     const fetchData = async () => {
         try {
             const [songsRes, albumsRes] = await Promise.all([api.get('/songs'), api.get('/albums')]);
-            setSongs(songsRes.data);
-            setAlbums(albumsRes.data);
-        } catch (error) { console.error(error); } 
-        finally { setIsLoading(false); }
+            
+            // Safely extract arrays whether Laravel returns wrapped data or raw arrays
+            setSongs(Array.isArray(songsRes.data) ? songsRes.data : (songsRes.data.data || []));
+            setAlbums(Array.isArray(albumsRes.data) ? albumsRes.data : (albumsRes.data.data || []));
+        } catch (error) { 
+            console.error("Failed to fetch home data", error); 
+        } finally { 
+            setIsLoading(false); 
+        }
     };
     fetchData();
   }, []);
@@ -68,16 +73,17 @@ const Home = () => {
       <div className="bg-gradient-to-r from-purple-900 to-black rounded-2xl md:rounded-3xl p-6 md:p-8 mb-8 flex flex-col justify-end h-64 md:h-80 relative overflow-hidden border border-white/10 group">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1000&q=80')] bg-cover opacity-40 mix-blend-overlay"></div>
         <div className="relative z-10">
-            <h5 className="text-purple-300 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-2">{user.isLoggedIn ? 'Welcome Back' : 'Discover Grace'}</h5>
-            <h1 className="text-3xl md:text-5xl font-black text-white mb-4 leading-tight">{user.isLoggedIn ? `Hello, ${user.name}` : 'Music for the Soul'}</h1>
-            <button onClick={() => user.isLoggedIn ? navigate('/library') : navigate('/login')} className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-8 py-3 text-sm rounded-full transition-all">{user.isLoggedIn ? 'Go to Library' : 'Get Started'}</button>
+            <h5 className="text-purple-300 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-2">{user?.isLoggedIn ? 'Welcome Back' : 'Discover Grace'}</h5>
+            <h1 className="text-3xl md:text-5xl font-black text-white mb-4 leading-tight">{user?.isLoggedIn ? `Hello, ${user.name}` : 'Music for the Soul'}</h1>
+            <button onClick={() => user?.isLoggedIn ? navigate('/library') : navigate('/login')} className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-8 py-3 text-sm rounded-full transition-all">{user?.isLoggedIn ? 'Go to Library' : 'Get Started'}</button>
         </div>
       </div>
 
       <section className="mb-10">
         <h2 className="text-xl md:text-2xl font-bold text-white mb-4">Latest Singles</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-            {songs.map(song => <SongCard key={song.id} song={song} />)}
+            {/* PASS THE SONGS ARRAY HERE SO QUEUE TRACKING WORKS */}
+            {songs.map(song => <SongCard key={song.id} song={song} songs={songs} />)}
         </div>
       </section>
 

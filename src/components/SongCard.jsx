@@ -4,7 +4,7 @@ import { usePlayer } from '../context/PlayerContext';
 import api from '../api/axios';
 import CoverImage from './CoverImage'; 
 
-const SongCard = ({ song }) => {
+const SongCard = ({ song, songs = [] }) => {
   const { playSong, user, currentSong, isPlaying } = usePlayer();
   const isActive = isPlaying && currentSong?.id === song.id;
 
@@ -12,14 +12,12 @@ const SongCard = ({ song }) => {
   const handleDownload = async (e) => {
     e.stopPropagation();
 
-    // 1. Authentication Guard
     if (!user.isLoggedIn) {
         alert("Please Log In to download this song.");
         return;
     }
 
     try {
-      // 2. Fetch the file as a blob to trigger download
       const response = await fetch(song.music_file_url);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -33,7 +31,6 @@ const SongCard = ({ song }) => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download failed:", error);
-      // Fallback: Open in new tab
       window.open(song.music_file_url, '_blank');
     }
   };
@@ -55,7 +52,7 @@ const SongCard = ({ song }) => {
 
   return (
     <div 
-      onClick={() => playSong(song)}
+      onClick={() => playSong(song, songs)}
       className="bg-[#181818] p-4 rounded-xl hover:bg-[#282828] transition-all duration-300 group cursor-pointer relative"
     >
       {/* Cover Art Section */}
